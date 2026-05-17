@@ -2,21 +2,34 @@
 
 ![RedLinux Hero](/client/public/redlinux_share_card.png)
 
-## Overview
+## 🛡️ Overview
 
 RedLinux is a cutting-edge, autonomous Red Team Operations Framework designed to streamline and enhance offensive security engagements. Built with a modern full-stack TypeScript architecture, RedLinux provides a sophisticated neural interface for conducting reconnaissance, network infiltration, exploit development, command and control (C2), and data exfiltration.
 
-## Key Features
+## 🚀 Key Features
 
-- **AETHER-OSINT Nexus**: Advanced OSINT gathering with real-time data feeds from Shodan, Censys, and GreyNoise.
-- **Network Infiltrator**: Real-time network scanning and topology mapping using integrated `nmap` engines.
-- **Nexus Exploit**: Dynamic exploit development and management platform.
-- **Ghost C2**: Stealthy Command and Control channels with active beacon monitoring.
-- **Loot Vault**: Encrypted AES-256-GCM repository for captured credentials and sensitive data.
-- **AI Strategist**: Neural-linked blackhat arsenal leveraging GPT-4 and local GGUF models for autonomous decision making.
-- **UltraAdvanced**: Polymorphic shellcode mutation and AMSI bypass generation.
+### 🌐 AETHER-OSINT Nexus
+Advanced Open-Source Intelligence gathering with real-time data feeds from **Shodan**, **Censys**, and **GreyNoise**. Features interactive data visualization and automated scan initiation.
 
-## Technology Stack
+### 📡 Network Infiltrator
+Comprehensive network scanning and topology mapping using integrated `nmap` engines. Provides real-time insights into target infrastructure and potential entry points.
+
+### ⚡ Nexus Exploit
+A dynamic exploit development and management platform. Integrates vulnerability findings to synthesize and deploy exploits with precision and impact.
+
+### 👻 Ghost C2
+Stealthy Command and Control channels for maintaining persistent access. Features active beacon monitoring, secure command transmission, and steganographic exfiltration.
+
+### 🔐 Loot Vault
+An encrypted repository (AES-256-GCM) for securely storing captured credentials, sensitive data, and other valuable assets acquired during engagements.
+
+### 🧠 AI Strategist (Neural Core)
+Leverages **GPT-4** and local **GGUF** models for strategic planning, anomaly detection, and automated decision-making in complex scenarios.
+
+### 🧬 UltraAdvanced
+Neural-linked blackhat arsenal featuring polymorphic shellcode mutation, AMSI bypass generation, and kernel rootkit integration.
+
+## 🛠️ Technology Stack
 
 - **Frontend**: React 19, Vite 8, TailwindCSS 4, shadcn/ui
 - **Backend**: Express 5, tRPC 11, Drizzle ORM
@@ -24,38 +37,49 @@ RedLinux is a cutting-edge, autonomous Red Team Operations Framework designed to
 - **Queue/Cache**: Redis 6.0 (BullMQ)
 - **Language**: TypeScript 6.0 (End-to-end type safety)
 
-## Getting Started
+## 📦 Installation
 
-To deploy RedLinux, refer to the [INSTALLATION.md](INSTALLATION.md) guide.
-
-### Quick Start (Standalone)
-
+### 1. Debian Package (Recommended)
+The easiest way to install RedLinux on Ubuntu/Debian systems.
 ```bash
-# Download the standalone tarball
-wget https://github.com/masterfrequency/RedLinux/releases/download/v4.1.0/redlinux-4.1.0-standalone.tar.gz
+# Download the .deb package from the repository
+sudo dpkg -i redlinux-4.1.0-amd64.deb
+# The service will be automatically configured and started
+```
 
-# Extract and install
-tar -xzf redlinux-4.1.0-standalone.tar.gz
+### 2. Standalone Deployment
+```bash
+# Clone the repository
+git clone https://github.com/masterfrequency/RedLinux.git
+cd RedLinux
+
+# Install dependencies
 pnpm install
 
 # Configure environment
 cp .env.example .env
-# Edit .env with your MySQL and Redis credentials
+# Edit .env with your MySQL, Redis, and API credentials
 
-# Start the server
-node dist/index.js
+# Build and Start
+pnpm run build
+NODE_ENV=production node dist/index.js
 ```
 
-## Documentation
+### 3. Docker Container
+```bash
+docker-compose up -d
+```
 
-- [INSTALLATION.md](INSTALLATION.md) - Detailed deployment instructions.
+## 📖 Documentation
+
+- [INSTALLATION.md](INSTALLATION.md) - Detailed deployment and service configuration.
 - [API_PROVIDERS_GUIDE.md](API_PROVIDERS_GUIDE.md) - Integrating Shodan, Censys, and GreyNoise.
-- [GGUF_MODELS_REFERENCE.md](GGUF_MODELS_REFERENCE.md) - Local LLM configuration.
-- [PRODUCTION_SUMMARY.md](PRODUCTION_SUMMARY.md) - Architecture and security overview.
+- [GGUF_MODELS_REFERENCE.md](GGUF_MODELS_REFERENCE.md) - Local LLM configuration and hardware requirements.
+- [PRODUCTION_SUMMARY.md](PRODUCTION_SUMMARY.md) - Architecture, security posture, and performance metrics.
 
-## License
+## ⚖️ License
 
 This project is licensed under the MIT License.
 
 ---
-_RedLinux: Shadow Dashboard v4.1 - Autonomous Red Team Operations Framework._
+_RedLinux: Shadow Dashboard v4.1 - Autonomous Red Team Operations Framework. Engineered for the future of offensive security._
