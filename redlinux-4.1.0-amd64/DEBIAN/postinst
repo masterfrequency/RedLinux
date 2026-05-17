@@ -1,0 +1,7 @@
+#!/bin/bash
+cd /opt/redlinux
+# Check if npm is available and install production dependencies
+if command -v npm >/dev/null 2>&1; then
+    npm install --production --no-audit --no-fund
+fi
+chmod +x /usr/bin/redlinux

@@ -4,6 +4,8 @@ Section: utils
 Priority: optional
 Architecture: amd64
 Maintainer: PhonkAlphabet <phonk@redlinux.io>
+Depends: nodejs (>= 18.0.0)
 Description: RedLinux Supreme Red Team Operations Framework
  Weaponized V4.1 with EDR Silencing, Polymorphic C2, and Shadow Exfil.
- Includes Desktop Integration and Supreme UI.
+ Includes Desktop Integration, Supreme UI, and Animated HUD.
+ Size optimized for high-speed deployment.

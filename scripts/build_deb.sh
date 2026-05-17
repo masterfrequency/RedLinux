@@ -1,15 +1,15 @@
 #!/bin/bash
 set -e
 
-# PhonkAlphabet's Supreme .deb Builder
-# Version: 4.1.0 (Weaponized + Desktop Integration)
+# PhonkAlphabet's Optimized Supreme .deb Builder
+# Version: 4.1.0 (Weaponized + Desktop Integration + Size Optimized)
 
 APP_NAME="redlinux"
 VERSION="4.1.0"
 ARCH="amd64"
 PKG_DIR="${APP_NAME}-${VERSION}-${ARCH}"
 
-echo "⚡️👾 Starting PhonkAlphabet's Supreme Build Sequence... 👾⚡️"
+echo "⚡️👾 Starting PhonkAlphabet's Optimized Supreme Build Sequence... 👾⚡️"
 
 # 1. Clean and Build
 pnpm run build
@@ -30,25 +30,39 @@ Section: utils
 Priority: optional
 Architecture: ${ARCH}
 Maintainer: PhonkAlphabet <phonk@redlinux.io>
+Depends: nodejs (>= 18.0.0)
 Description: RedLinux Supreme Red Team Operations Framework
  Weaponized V4.1 with EDR Silencing, Polymorphic C2, and Shadow Exfil.
- Includes Desktop Integration and Supreme UI.
+ Includes Desktop Integration, Supreme UI, and Animated HUD.
+ Size optimized for high-speed deployment.
 EOF
 
-# 4. Copy Files
+# 4. Copy Files (Optimized: Exclude node_modules, user must run npm install or we bundle only essentials)
+# For a real production deb, we bundle the dist and a production-only package.json
 cp -r dist/* "${PKG_DIR}/opt/${APP_NAME}/"
-cp -r node_modules "${PKG_DIR}/opt/${APP_NAME}/"
 cp package.json "${PKG_DIR}/opt/${APP_NAME}/"
 cp client/public/redlinux_icon.png "${PKG_DIR}/usr/share/icons/hicolor/scalable/apps/${APP_NAME}.png"
 
-# 5. Create Entrypoint Script
+# 5. Create Post-Install Script to handle dependencies
+cat <<EOF > "${PKG_DIR}/DEBIAN/postinst"
+#!/bin/bash
+cd /opt/${APP_NAME}
+# Check if npm is available and install production dependencies
+if command -v npm >/dev/null 2>&1; then
+    npm install --production --no-audit --no-fund
+fi
+chmod +x /usr/bin/${APP_NAME}
+EOF
+chmod 755 "${PKG_DIR}/DEBIAN/postinst"
+
+# 6. Create Entrypoint Script
 cat <<EOF > "${PKG_DIR}/usr/bin/${APP_NAME}"
 #!/bin/bash
 cd /opt/${APP_NAME} && node index.js
 EOF
 chmod +x "${PKG_DIR}/usr/bin/${APP_NAME}"
 
-# 6. Create Desktop Entry
+# 7. Create Desktop Entry
 cat <<EOF > "${PKG_DIR}/usr/share/applications/${APP_NAME}.desktop"
 [Desktop Entry]
 Name=RedLinux Supreme
@@ -60,7 +74,7 @@ Type=Application
 Categories=Security;Development;
 EOF
 
-# 7. Create Systemd Service
+# 8. Create Systemd Service
 cat <<EOF > "${PKG_DIR}/etc/systemd/system/${APP_NAME}.service"
 [Unit]
 Description=RedLinux Supreme Framework
@@ -77,11 +91,11 @@ Restart=always
 WantedBy=multi-user.target
 EOF
 
-# 8. Build Package
+# 9. Build Package
 dpkg-deb --build "${PKG_DIR}"
 mv "${PKG_DIR}.deb" "${APP_NAME}-${VERSION}-${ARCH}.deb"
 
-# 9. Cleanup
+# 10. Cleanup
 rm -rf "${PKG_DIR}"
 
-echo "⚡️👾 Supreme Build Complete: ${APP_NAME}-${VERSION}-${ARCH}.deb 👾⚡️"
+echo "⚡️👾 Optimized Supreme Build Complete: ${APP_NAME}-${VERSION}-${ARCH}.deb 👾⚡️"
