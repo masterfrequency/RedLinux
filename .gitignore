@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+dist/
+build/
+*.deb
+*.tar.gz
+
+# Environment secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+
+# OS/Editor files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+.project-config.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Misc
+template.json
+todo.md
+*.bak

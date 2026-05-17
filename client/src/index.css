@@ -1,0 +1,285 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap");
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-mono:
+    "JetBrains Mono", "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+:root {
+  --primary: var(--color-blue-700);
+  --primary-foreground: var(--color-blue-50);
+  --sidebar-primary: var(--color-blue-600);
+  --sidebar-primary-foreground: var(--color-blue-50);
+  --chart-1: var(--color-blue-300);
+  --chart-2: var(--color-blue-500);
+  --chart-3: var(--color-blue-600);
+  --chart-4: var(--color-blue-700);
+  --chart-5: var(--color-blue-800);
+  --radius: 0.65rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.235 0.015 65);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.235 0.015 65);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.235 0.015 65);
+  --secondary: oklch(0.98 0.001 286.375);
+  --secondary-foreground: oklch(0.4 0.015 65);
+  --muted: oklch(0.967 0.001 286.375);
+  --muted-foreground: oklch(0.552 0.016 285.938);
+  --accent: oklch(0.967 0.001 286.375);
+  --accent-foreground: oklch(0.141 0.005 285.823);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
+  --ring: oklch(0.623 0.214 259.815);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.235 0.015 65);
+  --sidebar-accent: oklch(0.967 0.001 286.375);
+  --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-border: oklch(0.92 0.004 286.32);
+  --sidebar-ring: oklch(0.623 0.214 259.815);
+}
+
+.dark {
+  /* Dark Cyberpunk Theme - OKLCH color space */
+  --primary: oklch(0.6 0.2 200); /* Cyan primary */
+  --primary-foreground: oklch(0.05 0 0); /* Near black */
+  --sidebar-primary: oklch(0.55 0.22 200); /* Bright cyan */
+  --sidebar-primary-foreground: oklch(0.05 0 0);
+
+  /* Background and text */
+  --background: oklch(0.08 0.01 200); /* Deep dark blue-black */
+  --foreground: oklch(0.95 0.01 0); /* Near white */
+  --card: oklch(0.12 0.02 200); /* Slightly lighter dark blue */
+  --card-foreground: oklch(0.95 0.01 0);
+  --popover: oklch(0.12 0.02 200);
+  --popover-foreground: oklch(0.95 0.01 0);
+
+  /* Secondary and muted */
+  --secondary: oklch(0.3 0.1 280); /* Purple accent */
+  --secondary-foreground: oklch(0.9 0.01 0);
+  --muted: oklch(0.2 0.02 200); /* Muted dark blue */
+  --muted-foreground: oklch(0.6 0.02 0); /* Gray text */
+
+  /* Accent - Cyan neon */
+  --accent: oklch(0.65 0.25 200); /* Bright cyan */
+  --accent-foreground: oklch(0.08 0.01 200);
+
+  /* Destructive - Red neon */
+  --destructive: oklch(0.6 0.25 20); /* Bright red */
+  --destructive-foreground: oklch(0.95 0.01 0);
+
+  /* Borders and inputs */
+  --border: oklch(0.18 0.02 200); /* Dark blue border */
+  --input: oklch(0.12 0.02 200); /* Dark input background */
+  --ring: oklch(0.65 0.25 200); /* Cyan ring */
+
+  /* Chart colors - Neon palette */
+  --chart-1: oklch(0.65 0.25 200); /* Cyan */
+  --chart-2: oklch(0.6 0.25 280); /* Magenta */
+  --chart-3: oklch(0.7 0.25 120); /* Lime */
+  --chart-4: oklch(0.6 0.25 20); /* Red */
+  --chart-5: oklch(0.55 0.2 200); /* Darker cyan */
+
+  /* Sidebar */
+  --sidebar: oklch(0.12 0.02 200);
+  --sidebar-foreground: oklch(0.95 0.01 0);
+  --sidebar-accent: oklch(0.65 0.25 200);
+  --sidebar-accent-foreground: oklch(0.08 0.01 200);
+  --sidebar-border: oklch(0.18 0.02 200);
+  --sidebar-ring: oklch(0.65 0.25 200);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-mono;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+  /**
+   * Custom container utility that centers content and adds responsive padding.
+   */
+  .container {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .flex {
+    @apply flex min-h-0 min-w-0;
+  }
+
+  /* Cyberpunk-specific styles */
+
+  /* Terminal/monospace typography */
+  .terminal-text {
+    @apply font-mono text-sm tracking-wider;
+  }
+
+  .terminal-lg {
+    @apply font-mono text-base tracking-wider;
+  }
+
+  .terminal-sm {
+    @apply font-mono text-xs tracking-wider;
+  }
+
+  /* Neon glow effects */
+  .neon-glow-cyan {
+    @apply text-cyan-400;
+    text-shadow:
+      0 0 10px rgba(34, 211, 238, 0.8),
+      0 0 20px rgba(34, 211, 238, 0.4);
+  }
+
+  .neon-glow-magenta {
+    @apply text-pink-500;
+    text-shadow:
+      0 0 10px rgba(236, 72, 153, 0.8),
+      0 0 20px rgba(236, 72, 153, 0.4);
+  }
+
+  .neon-glow-lime {
+    @apply text-lime-400;
+    text-shadow:
+      0 0 10px rgba(163, 230, 53, 0.8),
+      0 0 20px rgba(163, 230, 53, 0.4);
+  }
+
+  .neon-glow-red {
+    @apply text-red-500;
+    text-shadow:
+      0 0 10px rgba(239, 68, 68, 0.8),
+      0 0 20px rgba(239, 68, 68, 0.4);
+  }
+
+  /* Scanline effect overlay */
+  .scanlines {
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    pointer-events: none;
+  }
+
+  /* Grid background */
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(34, 211, 238, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34, 211, 238, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Cyberpunk card with neon border */
+  .cyber-card {
+    @apply bg-card text-card-foreground rounded-md border border-accent/50 p-4;
+    box-shadow:
+      inset 0 0 10px rgba(34, 211, 238, 0.1),
+      0 0 20px rgba(34, 211, 238, 0.05);
+  }
+
+  .cyber-card-lg {
+    @apply bg-card text-card-foreground rounded-md border border-accent/50 p-6;
+    box-shadow:
+      inset 0 0 10px rgba(34, 211, 238, 0.1),
+      0 0 20px rgba(34, 211, 238, 0.05);
+  }
+
+  /* Cyberpunk border highlight */
+  .cyber-border {
+    @apply border-accent/70;
+    box-shadow:
+      inset 0 0 10px rgba(34, 211, 238, 0.2),
+      0 0 15px rgba(34, 211, 238, 0.1);
+  }
+
+  /* Status indicators */
+  .status-active {
+    @apply text-lime-400;
+  }
+
+  .status-inactive {
+    @apply text-gray-500;
+  }
+
+  .status-warning {
+    @apply text-yellow-400;
+  }
+
+  .status-critical {
+    @apply text-red-500;
+  }
+
+  /* Data display grid */
+  .data-grid {
+    @apply grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  }
+
+  /* Monospace data display */
+  .data-mono {
+    @apply font-mono text-sm text-gray-400 break-all;
+  }
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

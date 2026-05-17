@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1778987187918,
+      "tag": "0000_thin_leech",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1778987273116,
+      "tag": "0001_youthful_mattie_franklin",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1779013383402,
+      "tag": "0002_organic_silver_samurai",
+      "breakpoints": true
+    }
+  ]
+}
