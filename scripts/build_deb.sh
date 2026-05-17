@@ -1,15 +1,15 @@
 #!/bin/bash
 set -e
 
-# PhonkAlphabet's Production-Grade .deb Builder
-# Version: 4.1.0 (Weaponized)
+# PhonkAlphabet's Supreme .deb Builder
+# Version: 4.1.0 (Weaponized + Desktop Integration)
 
 APP_NAME="redlinux"
 VERSION="4.1.0"
 ARCH="amd64"
 PKG_DIR="${APP_NAME}-${VERSION}-${ARCH}"
 
-echo "⚡️👾 Starting PhonkAlphabet's Weaponized Build Sequence... 👾⚡️"
+echo "⚡️👾 Starting PhonkAlphabet's Supreme Build Sequence... 👾⚡️"
 
 # 1. Clean and Build
 pnpm run build
@@ -19,6 +19,8 @@ mkdir -p "${PKG_DIR}/DEBIAN"
 mkdir -p "${PKG_DIR}/usr/bin"
 mkdir -p "${PKG_DIR}/opt/${APP_NAME}"
 mkdir -p "${PKG_DIR}/etc/systemd/system"
+mkdir -p "${PKG_DIR}/usr/share/applications"
+mkdir -p "${PKG_DIR}/usr/share/icons/hicolor/scalable/apps"
 
 # 3. Create Control File
 cat <<EOF > "${PKG_DIR}/DEBIAN/control"
@@ -30,12 +32,14 @@ Architecture: ${ARCH}
 Maintainer: PhonkAlphabet <phonk@redlinux.io>
 Description: RedLinux Supreme Red Team Operations Framework
  Weaponized V4.1 with EDR Silencing, Polymorphic C2, and Shadow Exfil.
+ Includes Desktop Integration and Supreme UI.
 EOF
 
 # 4. Copy Files
 cp -r dist/* "${PKG_DIR}/opt/${APP_NAME}/"
 cp -r node_modules "${PKG_DIR}/opt/${APP_NAME}/"
 cp package.json "${PKG_DIR}/opt/${APP_NAME}/"
+cp client/public/redlinux_icon.png "${PKG_DIR}/usr/share/icons/hicolor/scalable/apps/${APP_NAME}.png"
 
 # 5. Create Entrypoint Script
 cat <<EOF > "${PKG_DIR}/usr/bin/${APP_NAME}"
@@ -44,7 +48,19 @@ cd /opt/${APP_NAME} && node index.js
 EOF
 chmod +x "${PKG_DIR}/usr/bin/${APP_NAME}"
 
-# 6. Create Systemd Service
+# 6. Create Desktop Entry
+cat <<EOF > "${PKG_DIR}/usr/share/applications/${APP_NAME}.desktop"
+[Desktop Entry]
+Name=RedLinux Supreme
+Comment=Red Team Operations Framework
+Exec=/usr/bin/${APP_NAME}
+Icon=${APP_NAME}
+Terminal=false
+Type=Application
+Categories=Security;Development;
+EOF
+
+# 7. Create Systemd Service
 cat <<EOF > "${PKG_DIR}/etc/systemd/system/${APP_NAME}.service"
 [Unit]
 Description=RedLinux Supreme Framework
@@ -61,11 +77,11 @@ Restart=always
 WantedBy=multi-user.target
 EOF
 
-# 7. Build Package
+# 8. Build Package
 dpkg-deb --build "${PKG_DIR}"
 mv "${PKG_DIR}.deb" "${APP_NAME}-${VERSION}-${ARCH}.deb"
 
-# 8. Cleanup
+# 9. Cleanup
 rm -rf "${PKG_DIR}"
 
-echo "⚡️👾 Build Complete: ${APP_NAME}-${VERSION}-${ARCH}.deb 👾⚡️"
+echo "⚡️👾 Supreme Build Complete: ${APP_NAME}-${VERSION}-${ARCH}.deb 👾⚡️"

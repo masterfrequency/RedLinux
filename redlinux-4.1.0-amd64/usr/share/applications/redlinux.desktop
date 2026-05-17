@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=RedLinux Supreme
+Comment=Red Team Operations Framework
+Exec=/usr/bin/redlinux
+Icon=redlinux
+Terminal=false
+Type=Application
+Categories=Security;Development;

@@ -1,0 +1,9 @@
+Package: redlinux
+Version: 4.1.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: PhonkAlphabet <phonk@redlinux.io>
+Description: RedLinux Supreme Red Team Operations Framework
+ Weaponized V4.1 with EDR Silencing, Polymorphic C2, and Shadow Exfil.
+ Includes Desktop Integration and Supreme UI.
