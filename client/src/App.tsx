@@ -16,6 +16,7 @@ import ExfiltrationMonitor from "@/pages/ExfiltrationMonitor";
 import UltraAdvanced from "@/pages/UltraAdvanced";
 import Security from "@/pages/Security";
 import OSINTNexus from "@/pages/OSINTNexus";
+import SupremeDashboard from "@/pages/SupremeDashboard";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -37,8 +38,9 @@ function Router() {
   if (isAuthenticated) {
     return (
       <Switch>
+        <Route path="/supreme" component={SupremeDashboard} />
         <Route path="/dashboard" component={Dashboard} />
-        <Route path="/" component={Dashboard} />
+        <Route path="/" component={SupremeDashboard} />
         <Route path="/osint" component={OSINTNexus} />
         <Route path="/network" component={NetworkInfiltrator} />
         <Route path="/harvest" component={CredentialHarvester} />
@@ -69,18 +71,10 @@ function Router() {
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="dark"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster />
           <Router />
