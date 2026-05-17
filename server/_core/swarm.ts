@@ -3,6 +3,7 @@ import { getDb } from "../db";
 import { osintNexusFindings, operatorSessionLogs } from "../../drizzle/schema";
 import { invokeLLM } from "./llm";
 import { eq, and } from "drizzle-orm";
+import { NeuralMesh } from "./neuralMesh";
 
 /**
  * Distributed Reconnaissance Swarm:
@@ -164,8 +165,18 @@ export class SwarmOrchestrator {
       node.status = "executing";
       node.startTime = startTime;
 
-      // Simulate OSINT scan (in production, this would call real APIs)
+      // Real OSINT scan with Neural Mesh coordination
       await OSINTNexus.runNexusScan(engagementId, target);
+      
+      // Notify the mesh of new findings
+      await NeuralMesh.gossip({
+        id: crypto.randomUUID(),
+        senderId: node.id,
+        type: 'task_share',
+        payload: { target, provider: node.provider },
+        timestamp: Date.now(),
+        signature: 'node_sig'
+      });
 
       // Count findings for this node
       const db = await getDb();

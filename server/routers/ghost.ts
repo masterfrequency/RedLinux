@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, eq } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getDb } from "../db";
 import {
@@ -22,6 +22,9 @@ async function assertEngagementOwnership(engagementId: number, userId: number) {
   return db;
 }
 
+import { ghostC2Agents, ghostC2Tasks } from "../../drizzle/schema";
+import { GhostC2Engine } from "../_core/ghostEngine";
+
 export const ghostRouter = router({
   getChannels: protectedProcedure
     .input(z.object({ engagementId: z.number().int().positive() }))
@@ -34,6 +37,43 @@ export const ghostRouter = router({
         .select()
         .from(ghostC2Channels)
         .where(eq(ghostC2Channels.engagementId, input.engagementId));
+    }),
+
+  getAgents: protectedProcedure
+    .input(z.object({ engagementId: z.number().int().positive() }))
+    .query(async ({ input, ctx }) => {
+      const db = await assertEngagementOwnership(
+        input.engagementId,
+        ctx.user.id,
+      );
+      return db
+        .select()
+        .from(ghostC2Agents)
+        .where(eq(ghostC2Agents.engagementId, input.engagementId));
+    }),
+
+  getTasks: protectedProcedure
+    .input(z.object({ agentId: z.string() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+      return db
+        .select()
+        .from(ghostC2Tasks)
+        .where(eq(ghostC2Tasks.agentId, input.agentId))
+        .orderBy(desc(ghostC2Tasks.createdAt));
+    }),
+
+  issueCommand: protectedProcedure
+    .input(
+      z.object({
+        agentId: z.string(),
+        command: z.string(),
+        args: z.any().optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return GhostC2Engine.queueTask(input.agentId, input.command, input.args);
     }),
 
   createChannel: protectedProcedure

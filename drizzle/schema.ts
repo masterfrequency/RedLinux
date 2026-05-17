@@ -161,6 +161,44 @@ export type GhostC2Channel = typeof ghostC2Channels.$inferSelect;
 export type InsertGhostC2Channel = typeof ghostC2Channels.$inferInsert;
 
 /**
+ * Ghost C2 Agents: Tracking active implants
+ */
+export const ghostC2Agents = mysqlTable("ghost_c2_agents", {
+  id: int("id").autoincrement().primaryKey(),
+  engagementId: int("engagementId").notNull(),
+  channelId: int("channelId").notNull(),
+  agentId: varchar("agentId", { length: 64 }).notNull().unique(),
+  hostname: varchar("hostname", { length: 255 }),
+  os: varchar("os", { length: 255 }),
+  ipAddress: varchar("ipAddress", { length: 64 }),
+  lastSeen: timestamp("lastSeen").defaultNow().notNull(),
+  status: mysqlEnum("status", ["alive", "dead", "lost"]).default("alive").notNull(),
+  fingerprint: text("fingerprint"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type GhostC2Agent = typeof ghostC2Agents.$inferSelect;
+export type InsertGhostC2Agent = typeof ghostC2Agents.$inferInsert;
+
+/**
+ * Ghost C2 Tasks: Command queue for agents
+ */
+export const ghostC2Tasks = mysqlTable("ghost_c2_tasks", {
+  id: int("id").autoincrement().primaryKey(),
+  agentId: varchar("agentId", { length: 64 }).notNull(),
+  command: varchar("command", { length: 255 }).notNull(),
+  args: text("args"), // JSON
+  status: mysqlEnum("status", ["pending", "sent", "completed", "failed"]).default("pending").notNull(),
+  result: text("result"),
+  sentAt: timestamp("sentAt"),
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type GhostC2Task = typeof ghostC2Tasks.$inferSelect;
+export type InsertGhostC2Task = typeof ghostC2Tasks.$inferInsert;
+
+/**
  * Shadow Exfil: Data exfiltration tracking
  */
 export const shadowExfilTransfers = mysqlTable("shadow_exfil_transfers", {

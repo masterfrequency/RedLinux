@@ -1,0 +1,96 @@
+{
+  "name": "shodan-client",
+  "version": "3.2.0",
+  "description": "👀 A Node.js/JavaScript library for accessing the Shodan API",
+  "keywords": [
+    "node",
+    "Shodan",
+    "API",
+    "client",
+    "vulnerability",
+    "0day",
+    "client"
+  ],
+  "bugs": {
+    "url": "https://github.com/jesusprubio/shodan-client/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Jesus Rubio",
+    "url": "http://jesusprubio.dev"
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
+  "contributors": [
+    "https://github.com/jesusprubio/shodan-client/graphs/contributors"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jesusprubio/shodan-client.git"
+  },
+  "dependencies": {
+    "debug": "^4.1.1",
+    "got": "^10.6.0",
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "ava": "^3.5.0",
+    "depcheck": "^0.9.2",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-import": "^2.20.1",
+    "lint-staged": "^10.0.8",
+    "nyc": "^15.0.0",
+    "prettier": "^1.19.1"
+  },
+  "scripts": {
+    "format": "prettier --write '**/*.js'",
+    "lint": "eslint .",
+    "precommit": "lint-staged",
+    "deps": "depcheck --ignores=eslint-config-airbnb-base,eslint-config-prettier,eslint-plugin-import,eslint-plugin-json,lint-staged,np,prettier",
+    "pretest": "npm run deps && npm run lint",
+    "test-nokey": "ava -v test/nokey/**/*.js && ava test/nokey/utils.js",
+    "test": "nyc ava"
+  },
+  "ava": {
+    "files": [
+      "test/functional/**/*"
+    ],
+    "concurrency": 1,
+    "verbose": true,
+    "timeout": "20s"
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "eslintConfig": {
+    "extends": [
+      "airbnb-base",
+      "prettier"
+    ],
+    "env": {
+      "es6": true,
+      "node": true,
+      "browser": true
+    },
+    "rules": {
+      "strict": [
+        "off"
+      ]
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all"
+  }
+}

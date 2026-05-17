@@ -10,6 +10,7 @@ import {
 import crypto from "node:crypto";
 import path from "node:path";
 import fs from "node:fs/promises";
+import { ShadowStreamer } from "../_core/shadowStreamer";
 
 async function assertEngagementOwnership(engagementId: number, userId: number) {
   const db = await getDb();
@@ -325,6 +326,9 @@ export const exfilRouter = router({
       // Decode chunk data
       const chunkBuffer = Buffer.from(input.chunkData, "base64");
 
+      // Real storage of the chunk
+      await ShadowStreamer.receiveChunk(input.transferId, input.chunkIndex, chunkBuffer);
+
       // Process chunk with protocol-specific encoding
       const processedChunk = await ShadowExfilEngine.processChunk(
         chunkBuffer,
@@ -332,6 +336,17 @@ export const exfilRouter = router({
         input.engagementId,
         input.protocol,
       );
+
+      // Check if this was the last chunk and reassemble
+      const [transfer] = await db
+        .select()
+        .from(shadowExfilTransfers)
+        .where(eq(shadowExfilTransfers.id, input.transferId))
+        .limit(1);
+
+      if (transfer && input.chunkIndex + 1 >= (transfer.chunkCount || 0)) {
+        await ShadowStreamer.reassemble(input.transferId, transfer.chunkCount || 0, transfer.transferName);
+      }
 
       await db.insert(operatorSessionLogs).values({
         engagementId: input.engagementId,
