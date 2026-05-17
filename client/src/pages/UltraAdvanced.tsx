@@ -38,15 +38,11 @@ export default function UltraAdvanced() {
 
   const specterBypass = trpc.advanced.specterBypass.useMutation({
     onSuccess: (data) =>
-      toast.success(`Bypass technique: ${data.bypassTechnique}`),
+      toast.success(`Bypass technique: ${data.technique}`),
   });
 
   const rootkit = trpc.advanced.kernelRootkitIntegrator.useMutation({
-    onSuccess: (data) => toast.success(data.message),
-  });
-
-  const amsiBypass = trpc.advanced.amsiBypassGenerator.useMutation({
-    onSuccess: () => toast.success("AMSI Bypass script generated"),
+    onSuccess: () => toast.success("Rootkit deployment sequence initiated"),
   });
 
   const [sourceCode, setSourceCode] = useState(
@@ -134,7 +130,7 @@ export default function UltraAdvanced() {
                   </span>
                 </div>
                 <div className="space-y-2">
-                  {mesh?.nodes.map((node) => (
+                  {mesh?.nodes.map((node: any) => (
                     <div
                       key={node.id}
                       className="flex justify-between p-3 border border-cyan-500/10 rounded bg-cyan-500/5 text-xs font-mono"
@@ -210,22 +206,22 @@ export default function UltraAdvanced() {
               </Button>
               {specterBypass.data && (
                 <div className="p-2 border border-purple-500/20 bg-purple-500/5 rounded text-[10px] font-mono text-purple-400">
-                  BYPASS TECHNIQUE: {specterBypass.data.bypassTechnique}
+                  BYPASS TECHNIQUE: {specterBypass.data.technique}
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Rootkit & AMSI Bypass */}
+          {/* Rootkit */}
           <Card className="cyber-card border-red-500/20 bg-black/40">
             <CardHeader>
               <CardTitle className="terminal-text text-sm flex items-center gap-2 text-red-400">
                 <Bug className="h-4 w-4" />
-                KERNEL & AMSI EVASION
+                KERNEL EVASION
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 <Button
                   variant="outline"
                   className="border-red-500/20 hover:bg-red-500/10 text-red-400 font-mono text-[10px]"
@@ -241,25 +237,11 @@ export default function UltraAdvanced() {
                 >
                   DEPLOY LINUX ROOTKIT
                 </Button>
-                <Button
-                  variant="outline"
-                  className="border-blue-500/20 hover:bg-blue-500/10 text-blue-400 font-mono text-[10px]"
-                  onClick={() =>
-                    selectedEngagementId &&
-                    amsiBypass.mutate({
-                      engagementId: selectedEngagementId,
-                      scriptType: "powershell",
-                    })
-                  }
-                  disabled={amsiBypass.isPending || !selectedEngagementId}
-                >
-                  GENERATE AMSI BYPASS
-                </Button>
               </div>
-              {amsiBypass.data?.bypassScript && (
-                <pre className="bg-black/80 p-2 rounded border border-blue-500/20 font-mono text-[9px] text-blue-300 overflow-auto max-h-[100px]">
-                  {amsiBypass.data.bypassScript}
-                </pre>
+              {rootkit.data?.payload && (
+                <div className="p-2 border border-red-500/20 bg-red-500/5 rounded text-[10px] font-mono text-red-400">
+                  PAYLOAD: {rootkit.data.payload}
+                </div>
               )}
             </CardContent>
           </Card>

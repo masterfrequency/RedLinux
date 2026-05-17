@@ -6,24 +6,16 @@ import {
   specterEvasionSignatures,
   nexusExploitFindings,
   ghostC2Channels,
-  shadowExfilTransfers,
   lootVaultItems,
   operatorSessionLogs,
 } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
-import { createPolymorphicHeartbeat } from "../_core/polymorphicHeartbeat";
-import { SwarmOrchestrator } from "../_core/swarm";
-import { ThreatMapper } from "../_core/threatMapper";
-import {
-  sealToObsidian,
-  unsealFromObsidian,
-  listObsidianCache,
-  rotateObsidianKey,
-} from "../_core/obsidian";
-import { NetworkTopologyEngine } from "../_core/networkTopology";
 import { invokeLLM } from "../_core/llm";
-import { encrypt, decrypt } from "../_core/crypto";
-import { ENV } from "../_core/env";
+
+/**
+ * PhonkAlphabet's Aether V2: Automated Intelligence Synthesis
+ * Deep enrichment and automated attack surface analysis.
+ */
 
 export const aetherReconRouter = router({
   list: protectedProcedure
@@ -36,6 +28,7 @@ export const aetherReconRouter = router({
         .from(aetherReconFindings)
         .where(eq(aetherReconFindings.engagementId, input.engagementId));
     }),
+
   create: protectedProcedure
     .input(
       z.object({
@@ -61,7 +54,7 @@ export const aetherReconRouter = router({
             {
               role: "system",
               content:
-                "You are the Aether-Alpha. Analyze the provided reconnaissance finding and provide technical enrichment in JSON format.",
+                "You are Aether-Alpha, a supreme OSINT analyst. Analyze the provided reconnaissance finding and provide deep technical enrichment, potential attack vectors, and related infrastructure in JSON format.",
             },
             {
               role: "user",
@@ -77,7 +70,7 @@ export const aetherReconRouter = router({
             : aiResponse.choices[0].message.content;
 
         findingData = JSON.stringify({ ...input, enrichment });
-        confidence = 90;
+        confidence = 95;
       }
 
       await db.insert(aetherReconFindings).values({
@@ -90,17 +83,54 @@ export const aetherReconRouter = router({
         confidence: confidence,
       });
 
+      await db.insert(operatorSessionLogs).values({
+        engagementId: input.engagementId,
+        userId: ctx.user.id,
+        module: "aether",
+        action: "create_recon_finding",
+        details: JSON.stringify({ target: input.targetValue, enriched: !!input.autoEnrich }),
+        status: "success",
+      });
+
       return { success: true };
     }),
-  // Pillar III: Swarm Orchestration
-  dispatchSwarm: protectedProcedure
-    .input(z.object({ engagementId: z.number(), target: z.string() }))
+
+  synthesizeAttackSurface: protectedProcedure
+    .input(z.object({ engagementId: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      return SwarmOrchestrator.dispatchSwarm(
-        input.engagementId,
-        input.target,
-        Number(ctx.user.id),
-      );
+      const db = await getDb();
+      if (!db) throw new Error("Database offline");
+
+      const findings = await db
+        .select()
+        .from(aetherReconFindings)
+        .where(eq(aetherReconFindings.engagementId, input.engagementId));
+
+      const aiResponse = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: "You are Aether-Alpha. Synthesize the provided reconnaissance findings into a comprehensive attack surface map. Identify high-value targets, weak points, and recommended entry vectors.",
+          },
+          {
+            role: "user",
+            content: `Findings:\n${JSON.stringify(findings)}`,
+          },
+        ],
+      });
+
+      const synthesis = aiResponse.choices[0].message.content || "";
+
+      await db.insert(operatorSessionLogs).values({
+        engagementId: input.engagementId,
+        userId: ctx.user.id,
+        module: "aether",
+        action: "synthesize_attack_surface",
+        details: JSON.stringify({ findingsCount: findings.length }),
+        status: "success",
+      });
+
+      return { success: true, synthesis };
     }),
 });
 
@@ -115,17 +145,6 @@ export const specterEvasionRouter = router({
         .from(specterEvasionSignatures)
         .where(eq(specterEvasionSignatures.engagementId, input.engagementId));
     }),
-  create: protectedProcedure
-    .input(z.object({ engagementId: z.number(), payloadName: z.string() }))
-    .mutation(async ({ input, ctx }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
-      await db.insert(specterEvasionSignatures).values({
-        engagementId: input.engagementId,
-        payloadName: input.payloadName,
-      });
-      return { success: true };
-    }),
 });
 
 export const nexusExploitRouter = router({
@@ -138,26 +157,6 @@ export const nexusExploitRouter = router({
         .select()
         .from(nexusExploitFindings)
         .where(eq(nexusExploitFindings.engagementId, input.engagementId));
-    }),
-  // Pillar V: Automated Threat Surface Mapping
-  generateHeatMap: protectedProcedure
-    .input(z.object({ engagementId: z.number() }))
-    .query(async ({ input }) => {
-      return ThreatMapper.generateHeatMap(input.engagementId);
-    }),
-  // Real Network Topology Analysis
-  buildNetworkTopology: protectedProcedure
-    .input(z.object({ engagementId: z.number() }))
-    .query(async ({ input }) => {
-      return NetworkTopologyEngine.buildTopology(input.engagementId);
-    }),
-  suggestAttackVectors: protectedProcedure
-    .input(z.object({ engagementId: z.number() }))
-    .query(async ({ input }) => {
-      const topology = await NetworkTopologyEngine.buildTopology(
-        input.engagementId,
-      );
-      return NetworkTopologyEngine.suggestAttackVectors(topology);
     }),
 });
 
@@ -172,44 +171,6 @@ export const ghostC2Router = router({
         .from(ghostC2Channels)
         .where(eq(ghostC2Channels.engagementId, input.engagementId));
     }),
-  create: protectedProcedure
-    .input(
-      z.object({
-        engagementId: z.number(),
-        channelName: z.string(),
-        protocol: z.string(),
-        baseMinutes: z.number().optional(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
-
-      // Pillar II: Polymorphic C2 Heartbeats
-      const userSession = ctx.req.cookies["app_session_id"] || "";
-      const heartbeat = await createPolymorphicHeartbeat(
-        {
-          name: `ghost-c2-${input.channelName}-${Date.now()}`,
-          baseMinutes: input.baseMinutes || 15,
-          path: "/api/scheduled/ghost-checkin",
-          payload: {
-            engagementId: input.engagementId,
-            channelName: input.channelName,
-          },
-          description: `Polymorphic C2 heartbeat for ${input.channelName}`,
-        },
-        userSession,
-      );
-
-      await db.insert(ghostC2Channels).values({
-        engagementId: input.engagementId,
-        channelName: input.channelName,
-        channelType: input.protocol as any,
-        status: "active",
-      });
-
-      return { success: true, taskUid: heartbeat.taskUid };
-    }),
 });
 
 export const lootVaultRouter = router({
@@ -223,44 +184,4 @@ export const lootVaultRouter = router({
         .from(lootVaultItems)
         .where(eq(lootVaultItems.engagementId, input.engagementId));
     }),
-  // Pillar I: Obsidian Persistence Layer
-  seal: protectedProcedure
-    .input(
-      z.object({
-        engagementId: z.number(),
-        name: z.string(),
-        data: z.string(),
-        type: z.string().optional(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      return sealToObsidian(
-        input.engagementId,
-        input.name,
-        input.data,
-        input.type,
-        String(ctx.user.id),
-      );
-    }),
-  unseal: protectedProcedure
-    .input(z.object({ itemId: z.number(), engagementId: z.number() }))
-    .mutation(async ({ input, ctx }) => {
-      return unsealFromObsidian(
-        input.itemId,
-        input.engagementId,
-        String(ctx.user.id),
-      );
-    }),
-  listObsidian: protectedProcedure
-    .input(z.object({ engagementId: z.number() }))
-    .query(async ({ input }) => {
-      return listObsidianCache(input.engagementId);
-    }),
-  rotateKey: protectedProcedure
-    .input(z.object({ engagementId: z.number() }))
-    .mutation(async ({ input, ctx }) => {
-      return rotateObsidianKey(input.engagementId, String(ctx.user.id));
-    }),
 });
-
-// Shadow Exfil router is now in server/routers/exfil.ts

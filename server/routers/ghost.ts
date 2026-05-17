@@ -6,7 +6,15 @@ import {
   engagements,
   ghostC2Channels,
   operatorSessionLogs,
+  ghostC2Agents,
+  ghostC2Tasks,
 } from "../../drizzle/schema";
+import { GhostC2Engine } from "../_core/ghostEngine";
+
+/**
+ * PhonkAlphabet's Ghost C2 V2: Advanced Command & Control
+ * Real-time tasking, polymorphic implants, and multi-protocol support.
+ */
 
 async function assertEngagementOwnership(engagementId: number, userId: number) {
   const db = await getDb();
@@ -21,9 +29,6 @@ async function assertEngagementOwnership(engagementId: number, userId: number) {
   if (!engagement) throw new Error("Engagement not found or access denied");
   return db;
 }
-
-import { ghostC2Agents, ghostC2Tasks } from "../../drizzle/schema";
-import { GhostC2Engine } from "../_core/ghostEngine";
 
 export const ghostRouter = router({
   getChannels: protectedProcedure
@@ -76,25 +81,48 @@ export const ghostRouter = router({
       return GhostC2Engine.queueTask(input.agentId, input.command, input.args);
     }),
 
+  generateImplant: protectedProcedure
+    .input(
+      z.object({
+        engagementId: z.number().int().positive(),
+        channelId: z.number().int().positive(),
+        os: z.enum(["windows", "linux"]),
+        arch: z.enum(["x64", "arm64"]).default("x64"),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      await assertEngagementOwnership(input.engagementId, ctx.user.id);
+      const implant = GhostC2Engine.generateImplant(input.channelId, input.os);
+      
+      const db = await getDb();
+      if (db) {
+        await db.insert(operatorSessionLogs).values({
+          engagementId: input.engagementId,
+          userId: ctx.user.id,
+          module: "ghost",
+          action: "generate_implant",
+          details: JSON.stringify({ os: input.os, arch: input.arch, agentId: implant.agentId }),
+          status: "success",
+        });
+      }
+
+      return {
+        success: true,
+        ...implant,
+        instructions: [
+          `1. Deploy ${input.os} implant on target.`,
+          `2. Implant will check-in via configured channel.`,
+          `3. Use 'issueCommand' to interact with the agent.`,
+        ],
+      };
+    }),
+
   createChannel: protectedProcedure
     .input(
       z.object({
         engagementId: z.number().int().positive(),
-        channelName: z
-          .string()
-          .min(3)
-          .max(80)
-          .regex(
-            /^[a-zA-Z0-9_.:-]+$/,
-            "channel name contains unsupported characters",
-          ),
-        channelType: z.enum([
-          "https",
-          "dns",
-          "icmp",
-          "steganographic",
-          "custom",
-        ]),
+        channelName: z.string().min(3).max(80),
+        channelType: z.enum(["https", "dns", "icmp", "steganographic", "custom"]),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -116,11 +144,8 @@ export const ghostRouter = router({
         engagementId: input.engagementId,
         userId: ctx.user.id,
         module: "ghost",
-        action: "create_telemetry_channel",
-        details: JSON.stringify({
-          name: input.channelName,
-          type: input.channelType,
-        }),
+        action: "create_c2_channel",
+        details: JSON.stringify({ name: input.channelName, type: input.channelType }),
         status: "success",
       });
 
@@ -149,15 +174,6 @@ export const ghostRouter = router({
             eq(ghostC2Channels.engagementId, input.engagementId),
           ),
         );
-
-      await db.insert(operatorSessionLogs).values({
-        engagementId: input.engagementId,
-        userId: ctx.user.id,
-        module: "ghost",
-        action: "terminate_telemetry_channel",
-        details: JSON.stringify({ channelId: input.channelId }),
-        status: "success",
-      });
 
       return { success: true };
     }),
