@@ -26,10 +26,10 @@ export function encrypt(text: string, key: string): string {
   const iv1 = crypto.randomBytes(IV_LENGTH);
   const cipher1 = crypto.createCipheriv(CHACHA_ALGORITHM, chachaKey, iv1, {
     authTagLength: AUTH_TAG_LENGTH,
-  } as any);
+  });
   let encrypted1 = cipher1.update(text, "utf8");
   encrypted1 = Buffer.concat([encrypted1, cipher1.final()]);
-  const tag1 = (cipher1 as any).getAuthTag();
+  const tag1 = cipher1.getAuthTag();
 
   // Layer 2: AES-256-GCM
   const iv2 = crypto.randomBytes(IV_LENGTH);
@@ -71,7 +71,7 @@ export function decrypt(encryptedHex: string, key: string): string {
   // Decrypt Layer 1: ChaCha20-Poly1305
   const decipher1 = crypto.createDecipheriv(CHACHA_ALGORITHM, chachaKey, iv1, {
     authTagLength: AUTH_TAG_LENGTH,
-  } as any);
+  });
   decipher1.setAuthTag(tag1);
   let decrypted1 = decipher1.update(encrypted1);
   decrypted1 = Buffer.concat([decrypted1, decipher1.final()]);

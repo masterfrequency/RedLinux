@@ -172,7 +172,9 @@ export const ghostC2Agents = mysqlTable("ghost_c2_agents", {
   os: varchar("os", { length: 255 }),
   ipAddress: varchar("ipAddress", { length: 64 }),
   lastSeen: timestamp("lastSeen").defaultNow().notNull(),
-  status: mysqlEnum("status", ["alive", "dead", "lost"]).default("alive").notNull(),
+  status: mysqlEnum("status", ["alive", "dead", "lost"])
+    .default("alive")
+    .notNull(),
   fingerprint: text("fingerprint"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -188,7 +190,9 @@ export const ghostC2Tasks = mysqlTable("ghost_c2_tasks", {
   agentId: varchar("agentId", { length: 64 }).notNull(),
   command: varchar("command", { length: 255 }).notNull(),
   args: text("args"), // JSON
-  status: mysqlEnum("status", ["pending", "sent", "completed", "failed"]).default("pending").notNull(),
+  status: mysqlEnum("status", ["pending", "sent", "completed", "failed"])
+    .default("pending")
+    .notNull(),
   result: text("result"),
   sentAt: timestamp("sentAt"),
   completedAt: timestamp("completedAt"),

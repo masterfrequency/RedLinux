@@ -1,12 +1,18 @@
 import { Queue, Worker } from "bullmq";
 import IORedis from "ioredis";
 import { OSINTNexus } from "./osint";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { getDb } from "../db";
 import { networkScans } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
+import {
+  assertSafeFilename,
+  assertSafeRepo,
+  assertSafeTarget,
+  parseNmapOutput,
+} from "./nmapParse";
 
 const connection = new IORedis(
   process.env.REDIS_URL || "redis://localhost:6379",
@@ -14,45 +20,6 @@ const connection = new IORedis(
 );
 
 export const taskQueue = new Queue("redlinux-tasks", { connection });
-
-function parseNmapOutput(output: string) {
-  const lines = output.split("\n");
-  const results: any[] = [];
-  let currentHost: any = null;
-
-  lines.forEach((line) => {
-    const hostMatch = line.match(
-      /Nmap scan report for ([^\s]+)(?: \(([\d.]+)\))?/,
-    );
-    if (hostMatch) {
-      if (currentHost) results.push(currentHost);
-      currentHost = {
-        hostname: hostMatch[1],
-        ip: hostMatch[2] || hostMatch[1],
-        ports: [],
-        os: "Unknown",
-      };
-    }
-
-    const portMatch = line.match(/(\d+)\/(tcp|udp)\s+open\s+([^\s]+)\s*(.*)/);
-    if (portMatch && currentHost) {
-      currentHost.ports.push({
-        port: parseInt(portMatch[1]),
-        protocol: portMatch[2],
-        service: portMatch[3],
-        version: portMatch[4].trim(),
-      });
-    }
-
-    const osMatch = line.match(/Service Info: OS: ([^;]+)/);
-    if (osMatch && currentHost) {
-      currentHost.os = osMatch[1].trim();
-    }
-  });
-
-  if (currentHost) results.push(currentHost);
-  return results;
-}
 
 export const taskWorker = new Worker(
   "redlinux-tasks",
@@ -70,7 +37,12 @@ export const taskWorker = new Worker(
           .set({ status: "running" })
           .where(eq(networkScans.id, scanId));
 
-        const output = execSync(`nmap -sV -T4 ${target}`).toString();
+        const safeTarget = assertSafeTarget(target);
+        const output = execFileSync("nmap", ["-sV", "-T4", safeTarget], {
+          encoding: "utf8",
+          timeout: 600_000,
+          maxBuffer: 64 * 1024 * 1024,
+        });
         const parsedResults = parseNmapOutput(output);
 
         await db
@@ -95,10 +67,15 @@ export const taskWorker = new Worker(
       const { repo, filename } = job.data;
       const modelsDir = path.join(process.cwd(), "models");
       if (!fs.existsSync(modelsDir)) fs.mkdirSync(modelsDir);
-      const targetPath = path.join(modelsDir, filename);
+      const safeRepo = assertSafeRepo(repo);
+      const safeFilename = assertSafeFilename(filename);
+      const targetPath = path.join(modelsDir, safeFilename);
       try {
-        const url = `https://huggingface.co/${repo}/resolve/main/${filename}`;
-        execSync(`curl -L -o ${targetPath} ${url}`);
+        const url = `https://huggingface.co/${safeRepo}/resolve/main/${safeFilename}`;
+        execFileSync("curl", ["-L", "-o", targetPath, url], {
+          timeout: 600_000,
+          stdio: "pipe",
+        });
         return { success: true, results: `Model downloaded to ${targetPath}` };
       } catch (error) {
         return { success: false, error: "Download failed" };

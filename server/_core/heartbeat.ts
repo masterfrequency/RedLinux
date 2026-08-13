@@ -42,8 +42,8 @@ export type HeartbeatJobInfo = {
 const SERVICE = "webdevtoken.v1.WebDevService";
 
 const buildEndpoint = (rpc: string): string => {
-  const forgeUrl = (ENV as any).forgeApiUrl;
-  const forgeApiKey = (ENV as any).forgeApiKey;
+  const forgeUrl = ENV.forgeApiUrl;
+  const forgeApiKey = ENV.forgeApiKey;
 
   if (!forgeUrl) {
     throw new TRPCError({
@@ -66,7 +66,7 @@ const callForge = async <T>(
   body: Record<string, unknown>,
   userSession: string,
 ): Promise<T> => {
-  const forgeApiKey = (ENV as any).forgeApiKey;
+  const forgeApiKey = ENV.forgeApiKey;
   const endpoint = buildEndpoint(rpc);
   const headers: Record<string, string> = {
     accept: "application/json",

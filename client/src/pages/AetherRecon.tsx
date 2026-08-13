@@ -42,9 +42,9 @@ export function AetherReconModule({ engagementId }: { engagementId: number }) {
     try {
       await createMutation.mutateAsync({
         engagementId,
-        targetType: formData.targetType as any,
+        targetType: formData.targetType,
         targetValue: formData.targetValue,
-        findingType: formData.findingType as any,
+        findingType: formData.findingType,
         source: formData.source,
         confidence: formData.confidence,
       });

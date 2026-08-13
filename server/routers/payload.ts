@@ -40,11 +40,13 @@ export const payloadRouter = router({
           "reflective_dll",
           "shellcode",
         ]),
-        options: z.object({
-          obfuscationLevel: z.number().min(0).max(10).default(5),
-          antiAnalysis: z.boolean().default(true),
-          customEntry: z.string().optional(),
-        }).optional(),
+        options: z
+          .object({
+            obfuscationLevel: z.number().min(0).max(10).default(5),
+            antiAnalysis: z.boolean().default(true),
+            customEntry: z.string().optional(),
+          })
+          .optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -54,11 +56,15 @@ export const payloadRouter = router({
       const safeName = normalizeArtifactName(input.name);
       const extension = input.format === "shellcode" ? "bin" : input.format;
       const payloadName = `${safeName}_${input.os}_${input.arch}.${extension}`;
-      
+
       const entropyBuffer = crypto.randomBytes(1024 * 16);
-      const header = Buffer.from(`PHONK_PAYLOAD_V4_${input.os.toUpperCase()}_${input.arch.toUpperCase()}`);
-      const payloadContent = Buffer.concat([header, entropyBuffer]).toString("base64");
-      
+      const header = Buffer.from(
+        `PHONK_PAYLOAD_V4_${input.os.toUpperCase()}_${input.arch.toUpperCase()}`,
+      );
+      const payloadContent = Buffer.concat([header, entropyBuffer]).toString(
+        "base64",
+      );
+
       const manifestHash = crypto
         .createHash("sha256")
         .update(payloadContent)

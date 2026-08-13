@@ -43,8 +43,21 @@ export async function storagePut(
 }
 
 export async function storageGet(key: string): Promise<Buffer> {
+  // Keys are always sha256 hex digests produced by storagePut — enforce it.
+  // This blocks path traversal (../, absolute paths, URL-encoded separators).
+  if (!/^[a-f0-9]{64}$/.test(key)) {
+    throw new Error("Invalid vault key.");
+  }
+
   const targetPath = path.join(VAULT_DIR, key);
   if (!fs.existsSync(targetPath)) throw new Error("Asset not found in vault.");
+
+  // Defense in depth: confirm the resolved path stays inside the vault.
+  const realDir = fs.realpathSync(VAULT_DIR);
+  const realTarget = fs.realpathSync(targetPath);
+  if (!realTarget.startsWith(realDir + path.sep)) {
+    throw new Error("Invalid vault key.");
+  }
 
   const buffer = fs.readFileSync(targetPath);
 

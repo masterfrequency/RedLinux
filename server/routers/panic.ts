@@ -13,7 +13,7 @@ import crypto from "node:crypto";
 
 async function secureShred(filePath: string) {
   if (!fs.existsSync(filePath)) return;
-  
+
   const stats = fs.statSync(filePath);
   const size = stats.size;
   const fd = fs.openSync(filePath, "r+");
@@ -25,12 +25,12 @@ async function secureShred(filePath: string) {
     fs.writeSync(fd, Buffer.alloc(size, 0xff), 0, size, 0);
     // Pass 3: Random Data
     fs.writeSync(fd, crypto.randomBytes(size), 0, size, 0);
-    
+
     fs.fsyncSync(fd);
   } finally {
     fs.closeSync(fd);
   }
-  
+
   // Rename to random string before unlinking to wipe filename metadata
   const dir = path.dirname(filePath);
   const randomName = path.join(dir, crypto.randomBytes(16).toString("hex"));
@@ -85,7 +85,7 @@ export const panicRouter = router({
           method: "3-pass-shredding",
         }),
         status: "success",
-      } as any);
+      });
 
       return {
         success: true,

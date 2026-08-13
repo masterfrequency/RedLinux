@@ -37,8 +37,7 @@ export default function UltraAdvanced() {
   });
 
   const specterBypass = trpc.advanced.specterBypass.useMutation({
-    onSuccess: (data) =>
-      toast.success(`Bypass technique: ${data.technique}`),
+    onSuccess: (data) => toast.success(`Bypass technique: ${data.technique}`),
   });
 
   const rootkit = trpc.advanced.kernelRootkitIntegrator.useMutation({

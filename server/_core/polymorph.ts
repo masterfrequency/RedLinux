@@ -6,6 +6,35 @@ export async function mutateSourceCode(
 ): Promise<string> {
   const lines = source.split("\n");
   const mutatedLines = lines.map((line) => {
+    let out = line;
+
+    // String literal obfuscation — always applied, independent of junk.
+    if (line.includes('"') || line.includes("'")) {
+      out = line
+        .replace(/"(?:[^"\\]|\\.)*"/g, (match) => {
+          const p1 = match.slice(1, -1);
+          if (language === "python") {
+            const hex = Buffer.from(p1).toString("hex");
+            return `bytes.fromhex('${hex}').decode()`;
+          } else {
+            const chars = p1
+              .split("")
+              .map((c: string) => `'\\x${c.charCodeAt(0).toString(16)}'`)
+              .join(", ");
+            return `(char[]){${chars}, 0}`;
+          }
+        })
+        .replace(/'(?:[^'\\]|\\.)*'/g, (match) => {
+          const p1 = match.slice(1, -1);
+          if (language === "python") {
+            const hex = Buffer.from(p1).toString("hex");
+            return `bytes.fromhex('${hex}').decode()`;
+          }
+          return match;
+        });
+    }
+
+    // Optional junk variable — independent 30% roll per line.
     if (crypto.randomInt(100) > 70) {
       const junkVar = `_0x${crypto.randomBytes(2).toString("hex")}`;
       const junkVal = crypto.randomInt(1000);
@@ -13,23 +42,10 @@ export async function mutateSourceCode(
         language === "python"
           ? `${junkVar} = ${junkVal} # shadow-op`
           : `volatile int ${junkVar} = ${junkVal}; // shadow-op`;
-      return `${junkOp}\n${line}`;
+      return `${junkOp}\n${out}`;
     }
-    if (line.includes('"') || line.includes("'")) {
-      return line.replace(/"([^"]+)"/g, (match, p1) => {
-        if (language === "python") {
-          const hex = Buffer.from(p1).toString("hex");
-          return `bytes.fromhex('${hex}').decode()`;
-        } else {
-          const chars = p1
-            .split("")
-            .map((c: string) => `'\\x${c.charCodeAt(0).toString(16)}'`)
-            .join(", ");
-          return `(char[]){${chars}, 0}`;
-        }
-      });
-    }
-    return line;
+
+    return out;
   });
   return mutatedLines.join("\n");
 }

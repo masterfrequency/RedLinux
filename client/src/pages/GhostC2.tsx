@@ -71,7 +71,7 @@ export default function GhostC2() {
       height: "28%",
       label: "SYSTEM STATUS",
       action: () => handleAction("Health Check"),
-    }
+    },
   ];
 
   return (
@@ -103,18 +103,32 @@ export default function GhostC2() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/5">
-                    <TableHead className="text-muted-foreground font-mono">Agent ID</TableHead>
-                    <TableHead className="text-muted-foreground font-mono">Hostname</TableHead>
-                    <TableHead className="text-muted-foreground font-mono">OS</TableHead>
-                    <TableHead className="text-muted-foreground font-mono">Status</TableHead>
+                    <TableHead className="text-muted-foreground font-mono">
+                      Agent ID
+                    </TableHead>
+                    <TableHead className="text-muted-foreground font-mono">
+                      Hostname
+                    </TableHead>
+                    <TableHead className="text-muted-foreground font-mono">
+                      OS
+                    </TableHead>
+                    <TableHead className="text-muted-foreground font-mono">
+                      Status
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {agents.map((agent) => (
                     <TableRow key={agent.id} className="border-white/5">
-                      <TableCell className="font-mono text-cyan-400">{agent.agentId}</TableCell>
-                      <TableCell className="font-mono text-white">{agent.hostname}</TableCell>
-                      <TableCell className="font-mono text-muted-foreground">{agent.osType}</TableCell>
+                      <TableCell className="font-mono text-cyan-400">
+                        {agent.agentId}
+                      </TableCell>
+                      <TableCell className="font-mono text-white">
+                        {agent.hostname}
+                      </TableCell>
+                      <TableCell className="font-mono text-muted-foreground">
+                        {agent.os}
+                      </TableCell>
                       <TableCell>
                         <span className="flex items-center gap-2 text-[10px] font-bold text-lime-400">
                           <ShieldCheck className="h-3 w-3" />
