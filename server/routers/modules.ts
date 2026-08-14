@@ -88,7 +88,10 @@ export const aetherReconRouter = router({
         userId: ctx.user.id,
         module: "aether",
         action: "create_recon_finding",
-        details: JSON.stringify({ target: input.targetValue, enriched: !!input.autoEnrich }),
+        details: JSON.stringify({
+          target: input.targetValue,
+          enriched: !!input.autoEnrich,
+        }),
         status: "success",
       });
 
@@ -110,7 +113,8 @@ export const aetherReconRouter = router({
         messages: [
           {
             role: "system",
-            content: "You are Aether-Alpha. Synthesize the provided reconnaissance findings into a comprehensive attack surface map. Identify high-value targets, weak points, and recommended entry vectors.",
+            content:
+              "You are Aether-Alpha. Synthesize the provided reconnaissance findings into a comprehensive attack surface map. Identify high-value targets, weak points, and recommended entry vectors.",
           },
           {
             role: "user",

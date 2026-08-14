@@ -93,7 +93,7 @@ export const ghostRouter = router({
     .mutation(async ({ input, ctx }) => {
       await assertEngagementOwnership(input.engagementId, ctx.user.id);
       const implant = GhostC2Engine.generateImplant(input.channelId, input.os);
-      
+
       const db = await getDb();
       if (db) {
         await db.insert(operatorSessionLogs).values({
@@ -101,7 +101,11 @@ export const ghostRouter = router({
           userId: ctx.user.id,
           module: "ghost",
           action: "generate_implant",
-          details: JSON.stringify({ os: input.os, arch: input.arch, agentId: implant.agentId }),
+          details: JSON.stringify({
+            os: input.os,
+            arch: input.arch,
+            agentId: implant.agentId,
+          }),
           status: "success",
         });
       }
@@ -122,7 +126,13 @@ export const ghostRouter = router({
       z.object({
         engagementId: z.number().int().positive(),
         channelName: z.string().min(3).max(80),
-        channelType: z.enum(["https", "dns", "icmp", "steganographic", "custom"]),
+        channelType: z.enum([
+          "https",
+          "dns",
+          "icmp",
+          "steganographic",
+          "custom",
+        ]),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -145,7 +155,10 @@ export const ghostRouter = router({
         userId: ctx.user.id,
         module: "ghost",
         action: "create_c2_channel",
-        details: JSON.stringify({ name: input.channelName, type: input.channelType }),
+        details: JSON.stringify({
+          name: input.channelName,
+          type: input.channelType,
+        }),
         status: "success",
       });
 

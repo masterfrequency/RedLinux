@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { OSINTNexus } from "./osint";
 import { getDb } from "../db";
 import { osintNexusFindings, operatorSessionLogs } from "../../drizzle/schema";
@@ -167,18 +168,18 @@ export class SwarmOrchestrator {
 
       // Real OSINT scan with Neural Mesh coordination
       await OSINTNexus.runNexusScan(engagementId, target);
-      
+
       // Notify the mesh of new findings
       await NeuralMesh.gossip({
         id: crypto.randomUUID(),
         senderId: node.id,
-        type: 'task_share',
+        type: "task_share",
         payload: { target, provider: node.provider },
         timestamp: Date.now(),
-        signature: 'node_sig'
+        signature: "node_sig",
       });
 
-      // Count findings for this node
+      // Count findings for this node, scoped to its provider
       const db = await getDb();
       if (db) {
         const findings = await db
@@ -188,6 +189,7 @@ export class SwarmOrchestrator {
             and(
               eq(osintNexusFindings.engagementId, engagementId),
               eq(osintNexusFindings.target, target),
+              eq(osintNexusFindings.provider, node.provider),
             ),
           );
 
@@ -257,6 +259,3 @@ export class SwarmOrchestrator {
     }
   }
 }
-
-// Import crypto for randomBytes
-import crypto from "node:crypto";

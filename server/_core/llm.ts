@@ -16,15 +16,17 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   try {
     const response = await client.chat.completions.create({
       model: params.model || "gpt-4.1-mini",
-      messages: params.messages as any,
-      response_format: params.responseFormat as any,
+      messages: params.messages,
+      response_format: params.responseFormat,
     });
     return {
-      choices: response.choices.map((c: any) => ({
+      choices: response.choices.map((c) => ({
         message: { content: c.message.content },
       })),
     };
   } catch (error) {
-    throw new Error("AI Strategist offline.");
+    const detail =
+      error instanceof Error ? error.message : "Unknown LLM failure";
+    throw new Error(`AI Strategist offline: ${detail}`);
   }
 }

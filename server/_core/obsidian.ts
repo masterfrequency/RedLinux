@@ -37,11 +37,19 @@ function deriveObsidianKey(engagementId: number, operatorId?: string): string {
   return Buffer.from(derivedKey).toString("hex");
 }
 
+type ObsidianItemType =
+  | "hash"
+  | "credential"
+  | "document"
+  | "key"
+  | "token"
+  | "other";
+
 export async function sealToObsidian(
   engagementId: number,
   name: string,
   data: string,
-  type: string = "intelligence",
+  type: ObsidianItemType = "document",
   operatorId?: string,
 ) {
   const db = await getDb();
@@ -63,7 +71,7 @@ export async function sealToObsidian(
   await db.insert(lootVaultItems).values({
     engagementId,
     name,
-    itemType: (type as any) || "other",
+    itemType: type,
     category: "obsidian_cache",
     encryptedData,
     dataHash: integrityHash,

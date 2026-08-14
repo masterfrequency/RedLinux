@@ -90,7 +90,7 @@ export const cloudRouter = router({
         action: "bucket_scan",
         details: JSON.stringify(details),
         status: "success",
-      } as any);
+      });
 
       return { success: true, buckets: foundBuckets, vulnerabilities };
     }),
@@ -146,7 +146,7 @@ export const cloudRouter = router({
           accessLevels,
         }),
         status: "success",
-      } as any);
+      });
 
       return { bucketName: input.bucketName, statusCode, accessLevels };
     }),

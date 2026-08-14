@@ -64,8 +64,8 @@ export async function notifyOwner(
   payload: NotificationPayload,
 ): Promise<boolean> {
   const { title, content } = validatePayload(payload);
-  const forgeUrl = (ENV as any).forgeApiUrl;
-  const forgeApiKey = (ENV as any).forgeApiKey;
+  const forgeUrl = ENV.forgeApiUrl;
+  const forgeApiKey = ENV.forgeApiKey;
 
   if (!forgeUrl || !forgeApiKey) {
     throw new TRPCError({

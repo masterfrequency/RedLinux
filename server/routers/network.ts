@@ -33,7 +33,10 @@ export const networkRouter = router({
   getScans: protectedProcedure
     .input(z.object({ engagementId: z.number().int().positive() }))
     .query(async ({ input, ctx }) => {
-      const db = await assertEngagementOwnership(input.engagementId, ctx.user.id);
+      const db = await assertEngagementOwnership(
+        input.engagementId,
+        ctx.user.id,
+      );
       return db
         .select()
         .from(networkScans)
@@ -45,11 +48,16 @@ export const networkRouter = router({
       z.object({
         engagementId: z.number().int().positive(),
         target: z.string().min(1).max(255),
-        scanType: z.enum(["stealth", "aggressive", "discovery"]).default("stealth"),
+        scanType: z
+          .enum(["stealth", "aggressive", "discovery"])
+          .default("stealth"),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const db = await assertEngagementOwnership(input.engagementId, ctx.user.id);
+      const db = await assertEngagementOwnership(
+        input.engagementId,
+        ctx.user.id,
+      );
 
       const [scan] = await db.insert(networkScans).values({
         engagementId: input.engagementId,
@@ -84,8 +92,11 @@ export const networkRouter = router({
     .input(z.object({ engagementId: z.number().int().positive() }))
     .query(async ({ input, ctx }) => {
       await assertEngagementOwnership(input.engagementId, ctx.user.id);
-      const topology = await NetworkTopologyEngine.buildTopology(input.engagementId);
-      const attackVectors = NetworkTopologyEngine.suggestAttackVectors(topology);
+      const topology = await NetworkTopologyEngine.buildTopology(
+        input.engagementId,
+      );
+      const attackVectors =
+        NetworkTopologyEngine.suggestAttackVectors(topology);
 
       return { ...topology, attackVectors };
     }),

@@ -16,17 +16,27 @@ function advancedPolymorphicTransform(
   language: string,
   antiVM: boolean,
 ): string {
-  const originalDigest = crypto.createHash("sha256").update(source).digest("hex");
+  const originalDigest = crypto
+    .createHash("sha256")
+    .update(source)
+    .digest("hex");
   let mutatedSource = source;
   let obfuscationTechniques: string[] = [];
 
   if (language === "c" || language === "cpp") {
     obfuscationTechniques.push("LLVM-style Control Flow Flattening");
     obfuscationTechniques.push("Opaque Predicates");
-    mutatedSource = mutatedSource.replace(/\{/g, () => `{ if(0x${crypto.randomBytes(1).toString('hex')} > 0x${crypto.randomBytes(1).toString('hex')}) { /* nop */ } `);
+    mutatedSource = mutatedSource.replace(
+      /\{/g,
+      () =>
+        `{ if(0x${crypto.randomBytes(1).toString("hex")} > 0x${crypto.randomBytes(1).toString("hex")}) { /* nop */ } `,
+    );
   }
 
-  const mutatedDigest = crypto.createHash("sha256").update(mutatedSource).digest("hex");
+  const mutatedDigest = crypto
+    .createHash("sha256")
+    .update(mutatedSource)
+    .digest("hex");
   return [
     `// PHONK_POLYMORPH_V4`,
     `// ORIG_HASH: ${originalDigest}`,
@@ -37,9 +47,21 @@ function advancedPolymorphicTransform(
 
 export const advancedRouter = router({
   polymorphPayload: protectedProcedure
-    .input(z.object({ source: z.string(), language: z.string(), antiVM: z.boolean().default(false) }))
+    .input(
+      z.object({
+        source: z.string(),
+        language: z.string(),
+        antiVM: z.boolean().default(false),
+      }),
+    )
     .mutation(async ({ input }) => {
-      return { mutatedCode: advancedPolymorphicTransform(input.source, input.language, input.antiVM) };
+      return {
+        mutatedCode: advancedPolymorphicTransform(
+          input.source,
+          input.language,
+          input.antiVM,
+        ),
+      };
     }),
 
   getMeshStatus: protectedProcedure
@@ -47,8 +69,19 @@ export const advancedRouter = router({
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database offline.");
-      const channels = await db.select().from(ghostC2Channels).where(eq(ghostC2Channels.engagementId, input.engagementId));
-      return { nodes: channels.map(c => ({ id: c.channelName, status: "active", type: c.channelType, latency: "25ms" })), meshHealth: "100%" };
+      const channels = await db
+        .select()
+        .from(ghostC2Channels)
+        .where(eq(ghostC2Channels.engagementId, input.engagementId));
+      return {
+        nodes: channels.map((c) => ({
+          id: c.channelName,
+          status: "active",
+          type: c.channelType,
+          latency: "25ms",
+        })),
+        meshHealth: "100%",
+      };
     }),
 
   // --- PHONK'S DIRTY TRICKS: EDR SILENCING (BYOVD) ---
@@ -61,22 +94,26 @@ export const advancedRouter = router({
       // PhonkAlphabet: Bring Your Own Vulnerable Driver (BYOVD) technique
       // This logic selects a vulnerable signed driver to disable EDR callbacks in the kernel.
       const drivers: Record<string, string> = {
-        "crowdstrike": "RTCore64.sys (Micro-Star MSI Afterburner)",
-        "sentinelone": "gdrv.sys (Gigabyte)",
-        "defender": "procexp.sys (Sysinternals)",
-        "generic": "capcom.sys",
+        crowdstrike: "RTCore64.sys (Micro-Star MSI Afterburner)",
+        sentinelone: "gdrv.sys (Gigabyte)",
+        defender: "procexp.sys (Sysinternals)",
+        generic: "capcom.sys",
       };
 
-      const selectedDriver = drivers[input.targetEDR.toLowerCase()] || drivers.generic;
-      
+      const selectedDriver =
+        drivers[input.targetEDR.toLowerCase()] || drivers.generic;
+
       await db.insert(operatorSessionLogs).values({
         engagementId: input.engagementId,
         userId: ctx.user.id,
         module: "advanced",
         action: "edr_silencing_byovd",
-        details: JSON.stringify({ target: input.targetEDR, driver: selectedDriver }),
+        details: JSON.stringify({
+          target: input.targetEDR,
+          driver: selectedDriver,
+        }),
         status: "success",
-      } as any);
+      });
 
       return {
         success: true,
@@ -93,11 +130,13 @@ export const advancedRouter = router({
 
   // --- PHONK'S DIRTY TRICKS: AUTOMATED LATERAL MOVEMENT ---
   dispatchLateralMovement: protectedProcedure
-    .input(z.object({ 
-      engagementId: z.number(), 
-      targetHost: z.string(), 
-      method: z.enum(["wmi", "smb_exec", "winrm", "ssh_key_pivot"]) 
-    }))
+    .input(
+      z.object({
+        engagementId: z.number(),
+        targetHost: z.string(),
+        method: z.enum(["wmi", "smb_exec", "winrm", "ssh_key_pivot"]),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new Error("Database offline.");
@@ -107,9 +146,12 @@ export const advancedRouter = router({
         userId: ctx.user.id,
         module: "advanced",
         action: "lateral_movement_dispatch",
-        details: JSON.stringify({ target: input.targetHost, method: input.method }),
+        details: JSON.stringify({
+          target: input.targetHost,
+          method: input.method,
+        }),
         status: "success",
-      } as any);
+      });
 
       return {
         success: true,
@@ -124,26 +166,61 @@ export const advancedRouter = router({
     }),
 
   steganoExfil: protectedProcedure
-    .input(z.object({ engagementId: z.number(), imagePath: z.string(), data: z.string() }))
+    .input(
+      z.object({
+        engagementId: z.number(),
+        imagePath: z.string(),
+        data: z.string(),
+      }),
+    )
     .mutation(async ({ input }) => {
-      return { success: true, outputPath: path.join(process.cwd(), "tmp", `stegano_${crypto.randomBytes(8).toString("hex")}.png`) };
+      return {
+        success: true,
+        outputPath: path.join(
+          process.cwd(),
+          "tmp",
+          `stegano_${crypto.randomBytes(8).toString("hex")}.png`,
+        ),
+      };
     }),
 
   deployShadowC2: protectedProcedure
-    .input(z.object({ engagementId: z.number(), targetHost: z.string(), transport: z.enum(["dns", "https", "icmp", "stegano"]) }))
+    .input(
+      z.object({
+        engagementId: z.number(),
+        targetHost: z.string(),
+        transport: z.enum(["dns", "https", "icmp", "stegano"]),
+      }),
+    )
     .mutation(async ({ input }) => {
       return { success: true, shadowId: crypto.randomBytes(4).toString("hex") };
     }),
 
   kernelRootkitIntegrator: protectedProcedure
-    .input(z.object({ engagementId: z.number(), targetOS: z.enum(["linux", "windows"]), rootkitType: z.enum(["syscall_hook", "process_hiding", "file_hiding"]) }))
+    .input(
+      z.object({
+        engagementId: z.number(),
+        targetOS: z.enum(["linux", "windows"]),
+        rootkitType: z.enum(["syscall_hook", "process_hiding", "file_hiding"]),
+      }),
+    )
     .mutation(async ({ input }) => {
       return { success: true, payload: "LKM_SYSCALL_STEALER_V4" };
     }),
 
   specterBypass: protectedProcedure
-    .input(z.object({ engagementId: z.number(), payloadId: z.string(), edrTarget: z.string().optional() }))
+    .input(
+      z.object({
+        engagementId: z.number(),
+        payloadId: z.string(),
+        edrTarget: z.string().optional(),
+      }),
+    )
     .mutation(async ({ input }) => {
-      return { success: true, technique: "Hell's Gate Syscalls", status: "weaponized" };
+      return {
+        success: true,
+        technique: "Hell's Gate Syscalls",
+        status: "weaponized",
+      };
     }),
 });

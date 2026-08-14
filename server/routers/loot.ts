@@ -30,7 +30,14 @@ export const lootRouter = router({
       z.object({
         engagementId: z.number(),
         itemName: z.string().min(1),
-        itemType: z.enum(["hash", "credential", "document", "key", "token", "other"]),
+        itemType: z.enum([
+          "hash",
+          "credential",
+          "document",
+          "key",
+          "token",
+          "other",
+        ]),
         content: z.string(),
         source: z.string().optional(),
       }),
@@ -42,14 +49,17 @@ export const lootRouter = router({
       // PhonkAlphabet: Multi-layer encryption
       // 1. Application-level encryption using cookieSecret as the master key
       const encryptedContent = encrypt(input.content, ENV.cookieSecret);
-      
+
       // 2. Storage-level encryption (via storagePut)
       const storageInfo = await storagePut(
         `loot/${input.engagementId}/${crypto.randomBytes(16).toString("hex")}`,
         encryptedContent,
       );
 
-      const dataHash = crypto.createHash("sha256").update(input.content).digest("hex");
+      const dataHash = crypto
+        .createHash("sha256")
+        .update(input.content)
+        .digest("hex");
 
       await db.insert(lootVaultItems).values({
         engagementId: input.engagementId,
@@ -59,14 +69,18 @@ export const lootRouter = router({
         encryptedData: storageInfo.key,
         dataHash: dataHash,
         source: input.source || "Automated Capture",
-      } as any);
+      });
 
       await db.insert(operatorSessionLogs).values({
         engagementId: input.engagementId,
         userId: ctx.user.id,
         module: "loot",
         action: "secure_loot_capture",
-        details: JSON.stringify({ name: input.itemName, type: input.itemType, hash: dataHash }),
+        details: JSON.stringify({
+          item: input.itemName,
+          type: input.itemType,
+          hash: dataHash,
+        }),
         status: "success",
       });
 

@@ -6,7 +6,7 @@ import { eq, and, ne } from "drizzle-orm";
 export interface MeshMessage {
   id: string;
   senderId: string;
-  type: 'task_share' | 'loot_sync' | 'heartbeat' | 'leader_election';
+  type: "task_share" | "loot_sync" | "heartbeat" | "leader_election";
   payload: any;
   timestamp: number;
   signature: string;
@@ -28,10 +28,12 @@ export class NeuralMesh {
     const neighbors = await db
       .select()
       .from(ghostC2Agents)
-      .where(and(
-        ne(ghostC2Agents.agentId, message.senderId),
-        eq(ghostC2Agents.status, 'alive')
-      ))
+      .where(
+        and(
+          ne(ghostC2Agents.agentId, message.senderId),
+          eq(ghostC2Agents.status, "alive"),
+        ),
+      )
       .limit(3); // Gossip to 3 random neighbors
 
     for (const neighbor of neighbors) {
@@ -39,12 +41,12 @@ export class NeuralMesh {
       // Here we simulate the propagation by queuing a task for the neighbor
       await db.insert(ghostC2Tasks).values({
         agentId: neighbor.agentId,
-        command: 'mesh_gossip',
+        command: "mesh_gossip",
         args: JSON.stringify({
           originalMessage: message,
-          hopCount: hopCount + 1
+          hopCount: hopCount + 1,
         }),
-        status: 'pending'
+        status: "pending",
       });
     }
   }
@@ -59,10 +61,12 @@ export class NeuralMesh {
     const agents = await db
       .select()
       .from(ghostC2Agents)
-      .where(and(
-        eq(ghostC2Agents.engagementId, engagementId),
-        eq(ghostC2Agents.status, 'alive')
-      ));
+      .where(
+        and(
+          eq(ghostC2Agents.engagementId, engagementId),
+          eq(ghostC2Agents.status, "alive"),
+        ),
+      );
 
     if (agents.length === 0) return;
 
@@ -71,11 +75,11 @@ export class NeuralMesh {
 
     await this.gossip({
       id: crypto.randomUUID(),
-      senderId: 'system',
-      type: 'leader_election',
+      senderId: "system",
+      type: "leader_election",
       payload: { leaderId: leader.agentId },
       timestamp: Date.now(),
-      signature: 'system_sig'
+      signature: "system_sig",
     });
 
     return leader.agentId;
@@ -88,10 +92,13 @@ export class NeuralMesh {
     await this.gossip({
       id: crypto.randomUUID(),
       senderId: agentId,
-      type: 'loot_sync',
+      type: "loot_sync",
       payload: lootData,
       timestamp: Date.now(),
-      signature: crypto.createHash('sha256').update(agentId + JSON.stringify(lootData)).digest('hex')
+      signature: crypto
+        .createHash("sha256")
+        .update(agentId + JSON.stringify(lootData))
+        .digest("hex"),
     });
   }
 }

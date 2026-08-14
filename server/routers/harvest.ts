@@ -36,10 +36,11 @@ export const harvestRouter = router({
       await db.insert(lootVaultItems).values({
         engagementId: input.engagementId,
         name: `Creds: ${input.username} @ ${input.source}`,
+        itemType: "credential",
         category: "credential",
-        storagePath: storageInfo.key,
-        capturedAt: new Date(),
-      } as any);
+        encryptedData: storageInfo.key,
+        source: input.source,
+      });
 
       await db.insert(operatorSessionLogs).values({
         engagementId: input.engagementId,
@@ -48,7 +49,7 @@ export const harvestRouter = router({
         action: "credential_capture",
         details: JSON.stringify({ source: input.source, user: input.username }),
         status: "success",
-      } as any);
+      });
 
       return { success: true };
     }),

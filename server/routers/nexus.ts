@@ -48,7 +48,12 @@ export const nexusRouter = router({
         engagementId: z.number().int().positive(),
         vulnerabilityId: z.number().int().positive(),
         targetArch: z.enum(["x64", "x86", "arm64"]).default("x64"),
-        deliveryMethod: z.enum(["web_delivery", "smb_exec", "dll_sideload", "reflective_injection"]),
+        deliveryMethod: z.enum([
+          "web_delivery",
+          "smb_exec",
+          "dll_sideload",
+          "reflective_injection",
+        ]),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -129,7 +134,7 @@ export const nexusRouter = router({
         weaponizedCode,
         deployment: [
           `1. Compile using provided instructions.`,
-          `2. Host via Ghost C2 ${input.deliveryMethod === 'web_delivery' ? 'HTTPS' : 'SMB'} channel.`,
+          `2. Host via Ghost C2 ${input.deliveryMethod === "web_delivery" ? "HTTPS" : "SMB"} channel.`,
           `3. Execute on target: ${vuln.affectedTarget}.`,
         ],
       };

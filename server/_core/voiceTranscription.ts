@@ -246,43 +246,18 @@ function getLanguageName(langCode: string): string {
 }
 
 /**
- * Example tRPC procedure implementation:
+ * `transcribeAudio` is exported for direct use by any tRPC router.
+ * Wire it up as:
  *
  * ```ts
- * // In server/routers.ts
  * import { transcribeAudio } from "./_core/voiceTranscription";
  *
- * export const voiceRouter = router({
- *   transcribe: protectedProcedure
- *     .input(z.object({
- *       audioUrl: z.string(),
- *       language: z.string().optional(),
- *       prompt: z.string().optional(),
- *     }))
- *     .mutation(async ({ input, ctx }) => {
- *       const result = await transcribeAudio(input);
- *
- *       // Check if it's an error
- *       if ('error' in result) {
- *         throw new TRPCError({
- *           code: 'BAD_REQUEST',
- *           message: result.error,
- *           cause: result,
- *         });
- *       }
- *
- *       // Optionally save transcription to database
- *       await db.insert(transcriptions).values({
- *         userId: ctx.user.id,
- *         text: result.text,
- *         duration: result.duration,
- *         language: result.language,
- *         audioUrl: input.audioUrl,
- *         createdAt: new Date(),
- *       });
- *
- *       return result;
- *     }),
- * });
+ * transcribe: protectedProcedure
+ *   .input(z.object({ audioUrl: z.string(), language: z.string().optional() }))
+ *   .mutation(async ({ input }) => {
+ *     const result = await transcribeAudio(input);
+ *     if ("error" in result) throw new TRPCError({ code: "BAD_REQUEST", message: result.error });
+ *     return result;
+ *   }),
  * ```
  */
