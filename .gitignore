@@ -9,6 +9,8 @@ dist/
 build/
 *.deb
 *.tar.gz
+redlinux-*-amd64/
+*.tsbuildinfo
 
 # Environment secrets
 .env

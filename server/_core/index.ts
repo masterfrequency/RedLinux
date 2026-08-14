@@ -8,7 +8,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { shadowProxyMiddleware } from "./ghostAuth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { serveStatic, setupVite } from "./vite";
+import { serveStatic } from "./static";
 import { storageGet } from "./storage";
 import path from "path";
 
@@ -81,6 +81,7 @@ async function startServer() {
 
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
+    const { setupVite } = await import("./vite");
     await setupVite(app, server);
   } else {
     serveStatic(app);
